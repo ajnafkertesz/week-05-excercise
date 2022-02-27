@@ -1,0 +1,130 @@
+---
+title: "Week 5 Excercise"
+author: "Ajna Kertesz"
+date: "2/26/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Challange 1
+
+```{r challange1, echo=FALSE}
+
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(mosaic)
+
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/IMDB-movies.csv"
+d <- read_csv(f, col_names = TRUE)
+#d %<>% filter(d, startYear %in% 1920:1979, runtimeMinutes %in% 60:180)
+
+d <- filter(d, startYear %in% 1920:1979)
+d <- filter(d, runtimeMinutes %in% 60:180)
+
+
+d <- d %>% mutate(decade=
+           case_when(
+            startYear %in% 1920:1930 ~ "20s",
+            startYear %in% 1931:1940 ~ "30s",
+            startYear %in% 1941:1950 ~ "40s",
+            startYear %in% 1951:1960 ~ "50s",
+            startYear %in% 1961:1970 ~ "60s",
+            startYear %in% 1971:1979 ~ "70s"))
+
+head(d) 
+
+#distribution of runtimeMovies per decade
+
+p<-ggplot(data = d, aes(x = runtimeMinutes)) + geom_histogram()
+
+p<- p+ facet_wrap(~decade)
+
+p
+
+#Use a one-line statement to calculate the population mean and population standard deviation in runtimeMinutes for each decade and save the results in a new dataframe called results.
+
+d%>%
+  group_by(decade) %>%
+  summarize(mean=mean(runtimeMinutes), sd=sd(runtimeMinutes))->results
+
+results
+
+#Draw a single sample of 100 movies, without replacement, from each decade and calculate the single sample mean and single sample standard deviation in runtimeMinutes for each decades. Recall that your single sample mean for each decade is an estimate of the population mean for each decade.
+
+#select a sample from each decade
+
+
+d%>%
+  select(runtimeMinutes, decade)%>%
+  group_by(decade) %>%
+  sample_n(100, replace=FALSE) %>%
+  summarise_each(funs(mean, sd)) ->sampleresults
+
+
+sampleresults
+
+#calculate mean and sd for each sample
+
+sampleresults<-sampleresults%>%
+  mutate(standard_error=(sd/sqrt(100)))
+
+#Compare these estimates to the actual population mean runtimeMinutes for each decade and to the calculated SE in the population mean for samples of size 100 based on the population standard deviation for each decade.
+
+
+head(sampleresults)
+head(results) #when comparing we can see that they are almost exactly the same with only a less than +,-2 change in mean
+
+#Generate a sampling distribution of mean runtimeMinutes for each decade by [a] drawing 1000 samples of 100 movies from each decade and, for each sample, [b] calculating the mean runtimeMinutes and the standard deviation in runtimeMinutes for each decade. Use either the do(reps) * formulation from {mosaic}, the rerun() function from {purrr}, or the rep_sample_n() workflow from {infer} to generate your these sampling distributions.
+
+
+reps<-1000
+
+samp_dist_mean <- 
+  {do(reps) * sample_n(d,100, replace=FALSE)}%>%
+  group_by(decade,.index)%>%
+  summarize(mean=mean(runtimeMinutes), sd=sd(runtimeMinutes))
+
+samp_dist_mean
+
+
+#Then, calculate the MEAN and the STANDARD DEVIATION of the sampling distribution of sample means for each decade (the former should be a very good estimate of the population mean, while the latter is another estimate of the standard error in our estimate of the population mean for a particular sample size) and plot a histogram of the sampling distribution for each decade. What shape does it have?
+reps<-100
+
+samp_dist_mean<-
+  {do(reps) * sample_n(samp_dist_mean,100, replace=FALSE)}%>%
+mutate(MEAN=mean(mean), STANDARD_DEVIATION=sd(sd, na.rm=TRUE))
+
+samp_dist_mean
+
+p1<-ggplot(data = samp_dist_mean, aes(x = "Mean of runtimeMinutes")) + geom_histogram()
+
+p1<- p+ facet_wrap(~decade)
+
+#Finally, compare the standard error in runtimeMinutes for samples of size 100 from each decade [1] as estimated from your first sample of 100 movies, [2] as calculated from the known population standard deviations for each decade, and [3] as estimated from the sampling distribution of sample means for each decade.
+
+#[1]compare to the estimate from the 100 movies sample
+mean(sampleresults$sd) #19.97581
+
+#[2]known population sd for each decade
+mean(results$sd, na.rm=TRUE) #20.02343
+
+
+#[3]sampling distribution of sample means for each decade
+mean(samp_dist_mean$sd, na.rm=TRUE) #19.08625
+
+
+
+```
+
+## Challange 2
+
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
