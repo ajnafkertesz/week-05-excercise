@@ -141,7 +141,7 @@ z<- read_csv(zombies, col_names = TRUE)
 #Use {ggplot} and make boxplots of each of these variables by gender.
 
 boxplot(height ~ gender, data=z, xlab="", ylab="Height")
-ggplot(z, aes(x=heigh, y=gender)) + 
+ggplot(z, aes(x=height, y=gender)) + 
   geom_boxplot()
 
 ggplot(z, aes(x=weight, y=gender)) + 
