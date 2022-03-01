@@ -123,8 +123,17 @@ mean(samp_dist_mean$sd, na.rm=TRUE) #19.08625
 ## Challange 2
 
 
+```{r challange2, echo=FALSE}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+zombies<- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/zombies.csv"
+z<- read_csv(zombies, col_names = TRUE)
+
+ z%>%
+   mutate(heightm=mean(height),heightsd=sd(height) %>%
+          weightm=mean(weight),weightsd=sd(weight)%>%
+          agem=mean(age), agesd=sd(age)%>%
+          zombies_killedm=mean(zombies_killedm)
+          
+             
 ```
 
